@@ -72,6 +72,16 @@ io.sockets.on('connection', function (socket) {
         
     });
 
+    socket.on('disconnect', function () {
+        var tank_id = ownerTanks[controllers[socket.id]];
+        //objects[tank_id].disabled = true;
+        objects[tank_id].hp = 0;
+
+        socket.broadcast.emit('updateTank', {
+             object: objects[tank_id]
+        });
+    });
+
     // Main event distribution event =D
     socket.on('tank', function(data) {
         socket.broadcast.event('tank', data);
@@ -124,6 +134,7 @@ io.sockets.on('connection', function (socket) {
 
     var time = null;
     var update = function(tank) {
+        if (tank.disabled) return;
         var delta = (microtime.now() - time)/1000;
         time = microtime.now();
         if (_terrainCollision(tank, tank.predictPosition(delta))) {
@@ -203,7 +214,7 @@ io.sockets.on('connection', function (socket) {
             // Skip if this is a mine
             // @TODO: make this skip all but shootable shit
             if (objects[i].disabled) continue;
-            if (objects[i].type == 'mine') continue;
+            if (objects[i].type == 'Mine') continue;
 
             // Calculate distance to closest enemy
             var distance = _collide(tank, objects[i]);

@@ -1,0 +1,14 @@
+hooks:
+    branches:
+        master:
+            post-receive:
+                - Checkout
+                - Symlink
+                - RestartSupervisord
+    steps:
+        Checkout:
+            - "git archive --prefix=__HASH__/ | (cd /var/www/battletanks/ && tar xf -)"
+        Symlink:
+        	- "ln -sfT /var/www/battletanks/__HASH__ /var/www/battletanks/battletanks"
+        RestartSupervisord:
+        	- "supervisorctl battletanks restart"
