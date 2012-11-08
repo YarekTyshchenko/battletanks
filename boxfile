@@ -1,4 +1,10 @@
 hooks:
+    config_vars:
+        execute:
+            __HASH__: "git describe --always"
+            __BRANCH__: "git rev-parse --symbolic-full-name --abbrev-ref HEAD"
+        plain:
+            __ROOT__: "/var/www/battletanks"
     branches:
         master:
             post-receive:
@@ -7,8 +13,9 @@ hooks:
                 - RestartSupervisord
     steps:
         Checkout:
-            - "git archive --prefix=__HASH__/ | (cd /var/www/battletanks/ && tar xf -)"
+            - "git archive __BRANCH__ --prefix=__HASH__/ | (cd __ROOT__/versions/ && tar xf -)"
         Symlink:
-        	- "ln -sfT /var/www/battletanks/__HASH__ /var/www/battletanks/battletanks"
+            - "ln -sfT __ROOT__/versions/__HASH__ __ROOT__/battletanks"
+            - "ln -sfT __ROOT__/node_modules __ROOT__/battletanks/server/node_modules"
         RestartSupervisord:
-        	- "supervisorctl battletanks restart"
+            - "sudo supervisorctl restart battletanks"
